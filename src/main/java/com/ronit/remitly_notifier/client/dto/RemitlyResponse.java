@@ -1,2 +1,9 @@
-package com.ronit.remitly_notifier.client.dto;public class RemitlyResponse {
+package com.ronit.remitly_notifier.client.dto;
+
+import lombok.Data;
+
+@Data
+public class RemitlyResponse {
+
+    private Estimate estimate;
 }

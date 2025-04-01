@@ -1,4 +1,4 @@
-package com.ronit.remitly_notifier.controller.dto;
+package com.ronit.remitly_notifier.dto;
 
 import lombok.Builder;
 import lombok.Data;
