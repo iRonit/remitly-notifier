@@ -1,6 +1,5 @@
 # Build Jar
 FROM gradle:7.5.1-jdk18 AS build
-WORKDIR /app
 COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon
