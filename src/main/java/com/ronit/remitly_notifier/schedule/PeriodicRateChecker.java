@@ -18,8 +18,8 @@ import java.util.List;
 @Slf4j
 public class PeriodicRateChecker {
 
-    //    private static final long THIRTY_MINUTES_IN_MS = 30 * 60 * 1000L;
-    private static final long THIRTY_MINUTES_IN_MS = 2 * 60 * 1000L;
+    private static final long THIRTY_MINUTES_IN_MS = 30 * 60 * 1000L;
+    private static final long TWO_MINUTES_IN_MS = 2 * 60 * 1000L;
 
     private final RemitlyClient remitlyClient;
     private final WirePusherClient wirePusherClient;
