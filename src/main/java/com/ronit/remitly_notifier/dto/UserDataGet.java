@@ -3,11 +3,11 @@ package com.ronit.remitly_notifier.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
 public class UserDataGet {
 
-    private List<UserData> availableData;
+    private Set<UserDataDTO> availableData;
 }

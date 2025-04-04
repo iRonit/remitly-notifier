@@ -1,6 +1,6 @@
 package com.ronit.remitly_notifier.controller;
 
-import com.ronit.remitly_notifier.dto.UserData;
+import com.ronit.remitly_notifier.dto.UserDataDTO;
 import com.ronit.remitly_notifier.dto.UserDataGet;
 import com.ronit.remitly_notifier.service.DataHolderService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class DataHolderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerData(@RequestBody final UserData data) {
+    public void registerData(@RequestBody final UserDataDTO data) {
         this.dataHolderService.registerData(data);
         log.info("Data registered: {}", data);
     }
@@ -31,8 +31,7 @@ public class DataHolderController {
     @GetMapping
     public UserDataGet getAllData() {
         return UserDataGet.builder()
-                .availableData(this.dataHolderService.getData()
-                        .values().stream().toList())
+                .availableData(this.dataHolderService.getData())
                 .build();
     }
 }

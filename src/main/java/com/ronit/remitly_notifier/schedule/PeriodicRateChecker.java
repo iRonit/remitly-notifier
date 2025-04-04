@@ -3,7 +3,8 @@ package com.ronit.remitly_notifier.schedule;
 import com.ronit.remitly_notifier.client.RemitlyClient;
 import com.ronit.remitly_notifier.client.WirePusherClient;
 import com.ronit.remitly_notifier.client.dto.RemitlyClientResponse;
-import com.ronit.remitly_notifier.dto.UserData;
+import com.ronit.remitly_notifier.dto.UserDataDTO;
+import com.ronit.remitly_notifier.repository.model.UserData;
 import com.ronit.remitly_notifier.service.DataHolderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +39,14 @@ public class PeriodicRateChecker {
         log.info("Checking for conduit: {}", conduit);
         RemitlyClientResponse currentRateDetails = this.remitlyClient.fetchCurrentRate(conduit);
         log.info("Current Rate Details = {}", currentRateDetails);
-        List<UserData> filteredUsers = this.dataHolderService.getUserDataForConduit(conduit);
+        List<UserDataDTO> filteredUsers = this.dataHolderService.getUserDataForConduit(conduit);
         // TODO: parallelize below
-        for (UserData userData : filteredUsers) {
+        for (UserDataDTO userData : filteredUsers) {
             checkIfTargetMetAndPush(userData, currentRateDetails);
         }
     }
 
-    private void checkIfTargetMetAndPush(final UserData userData, final RemitlyClientResponse currentRateDetails) {
+    private void checkIfTargetMetAndPush(final UserDataDTO userData, final RemitlyClientResponse currentRateDetails) {
         if (currentRateDetails.getCurrentRate() >= userData.getTarget()) {
             log.info("Target has been achieved for deviceId= {}, Target= {}, CurrentRate = {}",
                     userData.getDeviceId(), userData.getTarget(), currentRateDetails.getCurrentRate());

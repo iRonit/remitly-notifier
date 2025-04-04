@@ -1,53 +1,84 @@
 package com.ronit.remitly_notifier.service;
 
-import com.ronit.remitly_notifier.dto.UserData;
+import com.ronit.remitly_notifier.dto.UserDataDTO;
+import com.ronit.remitly_notifier.repository.model.UserConduitTarget;
+import com.ronit.remitly_notifier.repository.model.UserData;
 import com.ronit.remitly_notifier.repository.UserDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 @Service
 public class DataHolderService {
 
-    private final Map<String, UserData> data = new ConcurrentHashMap<>(5);
+    private final Set<UserDataDTO> cachedData = new HashSet<>(10);
 
     private final UserDataRepository userDataRepository;
 
     @Autowired
     public DataHolderService(final UserDataRepository userDataRepository) {
         this.userDataRepository = userDataRepository;
-        this.data.putAll(getAllData());
+        this.cachedData.addAll(getAllData());
     }
 
-    public Map<String, UserData> getData() {
-        return Collections.unmodifiableMap(this.data);
+    public Set<UserDataDTO> getData() {
+        return Collections.unmodifiableSet(this.cachedData);
     }
 
-    public void registerData(final UserData userData) {
+    public void registerData(final UserDataDTO userData) {
         saveData(userData);
-        this.data.put(userData.getDeviceId(), userData);
+        updateSet(this.cachedData, userData);
     }
 
-    public List<UserData> getUserDataForConduit(final String conduit) {
-        return this.data.values().stream().filter(userData -> userData.getConduit().equals(conduit)).toList();
+    public List<UserDataDTO> getUserDataForConduit(final String conduit) {
+        return this.cachedData.stream()
+                .filter(userData -> userData.getConduit().equals(conduit))
+                .toList();
     }
 
     public Set<String> getAllConduits() {
-        return this.data.values().stream().map(UserData::getConduit).collect(Collectors.toSet());
+        return this.cachedData.stream()
+                .map(UserDataDTO::getConduit)
+                .collect(Collectors.toSet());
     }
 
-    private Map<String, UserData> getAllData() {
+    private Set<UserDataDTO> getAllData() {
         List<UserData> all = this.userDataRepository.findAll();
-        return all.stream().collect(Collectors.toMap(UserData::getDeviceId, item -> item));
+        Set<UserDataDTO> result = new HashSet<>();
+        all.forEach(userData -> result.addAll(mapUserConduitTargets(userData.getDeviceId(), userData.getConduitTargets())));
+        return result;
     }
 
-    private void saveData(final UserData userData) {
-        this.userDataRepository.save(userData);
+    private Set<UserDataDTO> mapUserConduitTargets(final String deviceId, final Set<UserConduitTarget> userConduitTargets) {
+        return userConduitTargets.stream()
+                .map(i -> UserDataDTO.mapUserConduitTarget(deviceId, i))
+                .collect(Collectors.toSet());
+    }
+
+    private void saveData(final UserDataDTO userData) {
+        UserData saved = this.userDataRepository.findByDeviceId(userData.getDeviceId());
+        if(isNull(saved)) {
+            saved = new UserData();
+            saved.setDeviceId(userData.getDeviceId());
+            saved.setConduitTargets(new HashSet<>());
+            this.userDataRepository.saveAndFlush(saved);
+        }
+        UserConduitTarget newConduitTarget = new UserConduitTarget();
+        newConduitTarget.setConduit(userData.getConduit());
+        newConduitTarget.setTarget(userData.getTarget());
+        updateSet(saved.getConduitTargets(), newConduitTarget);
+        this.userDataRepository.save(saved);
+    }
+
+    private <T> void updateSet(final Set<T> set, final T item) {
+        set.remove(item);
+        set.add(item);
     }
 }
