@@ -24,8 +24,7 @@ public class DataHolderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void registerData(@RequestBody final UserData data) {
-        this.dataHolderService.getData()
-                .put(data.getDeviceId(), data);
+        this.dataHolderService.registerData(data);
         log.info("Data registered: {}", data);
     }
 
