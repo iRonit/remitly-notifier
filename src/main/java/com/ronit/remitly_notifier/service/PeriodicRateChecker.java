@@ -4,8 +4,6 @@ import com.ronit.remitly_notifier.client.RemitlyClient;
 import com.ronit.remitly_notifier.client.WirePusherClient;
 import com.ronit.remitly_notifier.client.dto.RemitlyClientResponse;
 import com.ronit.remitly_notifier.dto.UserDataDTO;
-import com.ronit.remitly_notifier.repository.model.UserData;
-import com.ronit.remitly_notifier.service.DataHolderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
