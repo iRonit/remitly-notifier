@@ -6,6 +6,7 @@ import com.ronit.remitly_notifier.service.DataHolderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class DataHolderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void registerData(@RequestBody final UserDataDTO data) {
-        this.dataHolderService.registerData(data);
+        this.dataHolderService.register(data);
         log.info("Data registered: {}", data);
     }
 
@@ -33,5 +34,10 @@ public class DataHolderController {
         return UserDataGet.builder()
                 .availableData(this.dataHolderService.getData())
                 .build();
+    }
+
+    @DeleteMapping
+    public void deleteData(UserDataDTO data) {
+        this.dataHolderService.delete(data);
     }
 }

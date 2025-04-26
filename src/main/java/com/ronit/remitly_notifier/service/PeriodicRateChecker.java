@@ -1,4 +1,4 @@
-package com.ronit.remitly_notifier.schedule;
+package com.ronit.remitly_notifier.service;
 
 import com.ronit.remitly_notifier.client.RemitlyClient;
 import com.ronit.remitly_notifier.client.WirePusherClient;

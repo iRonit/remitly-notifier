@@ -4,18 +4,21 @@ import com.ronit.remitly_notifier.dto.UserDataDTO;
 import com.ronit.remitly_notifier.repository.model.UserConduitTarget;
 import com.ronit.remitly_notifier.repository.model.UserData;
 import com.ronit.remitly_notifier.repository.UserDataRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
 @Service
+@Slf4j
 public class DataHolderService {
 
     private final Set<UserDataDTO> cachedData = new HashSet<>(10);
@@ -32,9 +35,23 @@ public class DataHolderService {
         return Collections.unmodifiableSet(this.cachedData);
     }
 
-    public void registerData(final UserDataDTO userData) {
+    public void register(final UserDataDTO userData) {
         saveData(userData);
         updateSet(this.cachedData, userData);
+    }
+
+    public void delete(final UserDataDTO userData) {
+        this.userDataRepository.findById(userData.getDeviceId()).ifPresent(data -> {
+            Optional<UserConduitTarget> conduit = data.getConduitTargets().stream()
+                    .filter(c -> c.getConduit().equals(userData.getConduit()))
+                    .findAny();
+            conduit.ifPresent( conduitFound -> {
+                data.getConduitTargets().remove(conduitFound);
+                this.userDataRepository.save(data);
+                this.cachedData.remove(userData);
+                log.info("Data deleted: {}", userData);
+            });
+        });
     }
 
     public List<UserDataDTO> getUserDataForConduit(final String conduit) {
@@ -63,7 +80,8 @@ public class DataHolderService {
     }
 
     private void saveData(final UserDataDTO userData) {
-        UserData saved = this.userDataRepository.findByDeviceId(userData.getDeviceId());
+        UserData saved = this.userDataRepository.findById(userData.getDeviceId())
+                .orElse(null);
         if(isNull(saved)) {
             saved = new UserData();
             saved.setDeviceId(userData.getDeviceId());
