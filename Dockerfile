@@ -6,7 +6,7 @@ RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon
 
 # Deploy
-FROM eclipse-temurin:17-jre-alpine
+FROM openjdk:23-jdk-slim
 EXPOSE 8080
 COPY --from=build /app/build/libs/remitly-notifier-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
